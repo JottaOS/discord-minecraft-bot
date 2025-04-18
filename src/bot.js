@@ -3,11 +3,15 @@ require("dotenv").config();
 const { Client, GatewayIntentBits } = require("discord.js");
 const { spawn } = require("child_process");
 const https = require("https");
+
+const AUTHORIZED_ROLE_NAME = "mc-admin";
+
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
     GatewayIntentBits.GuildMessages,
     GatewayIntentBits.MessageContent,
+    GatewayIntentBits.GuildMembers,
   ],
 });
 
@@ -22,23 +26,18 @@ function getPublicIP() {
         res.on("data", (chunk) => (data += chunk));
         res.on("end", () => resolve(data));
       })
-      .on("error", (err) => {
-        reject(err);
-      });
+      .on("error", (err) => reject(err));
   });
 }
 
 function startMinecraftServer(message) {
   message.reply("🟢 Iniciando servidor...");
 
-  mcProcess = spawn(
-    "java",
-    ["-Xmx2G", "-Xms2G", "-jar", process.env.JAR_NAME, "nogui"],
-    {
-      cwd: process.env.JAR_PATH,
-      shell: true,
-    }
-  );
+  mcProcess = spawn("java", ["-Xmx8G", "-jar", process.env.JAR_NAME, "nogui"], {
+    cwd: process.env.JAR_PATH,
+    shell: true,
+  });
+
   getPublicIP()
     .then((ip) => {
       message.channel.send(
@@ -60,9 +59,13 @@ function startMinecraftServer(message) {
 
   mcProcess.on("exit", (code) => {
     console.log(`🛑 Servidor detenido con código ${code}`);
-    mcProcess = null;
     message.reply(`🛑 Servidor detenido con código ${code}`);
+    mcProcess = null;
   });
+}
+
+function userHasRole(member, roleName) {
+  return member.roles.cache.some((role) => role.name === roleName);
 }
 
 client.once("ready", () => {
@@ -74,6 +77,7 @@ client.on("messageCreate", async (message) => {
 
   const args = message.content.split(" ");
   const command = args[1];
+  const member = await message.guild.members.fetch(message.author.id);
 
   if (command === "start") {
     if (mcProcess) {
@@ -83,6 +87,11 @@ client.on("messageCreate", async (message) => {
 
     startMinecraftServer(message);
   } else if (command === "stop") {
+    if (!userHasRole(member, AUTHORIZED_ROLE_NAME)) {
+      message.reply("⛔ No tenés permiso para usar este comando.");
+      return;
+    }
+
     if (!mcProcess) {
       message.reply("⚠️ El servidor no está en ejecución.");
       return;
@@ -91,6 +100,11 @@ client.on("messageCreate", async (message) => {
     message.reply("🔴 Deteniendo servidor...");
     mcProcess.stdin.write("stop\n");
   } else if (command === "restart") {
+    if (!userHasRole(member, AUTHORIZED_ROLE_NAME)) {
+      message.reply("⛔ No tenés permiso para usar este comando.");
+      return;
+    }
+
     if (!mcProcess) {
       message.reply("⚠️ El servidor no está en ejecución. Iniciando...");
       startMinecraftServer(message);
@@ -101,6 +115,7 @@ client.on("messageCreate", async (message) => {
 
     mcProcess.once("exit", () => {
       startMinecraftServer(message);
+      message.channel.send("✅ Servidor reiniciado con éxito.");
     });
 
     mcProcess.stdin.write("stop\n");
