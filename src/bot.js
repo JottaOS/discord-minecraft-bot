@@ -39,6 +39,16 @@ function startMinecraftServer(message) {
       shell: true,
     }
   );
+  getPublicIP()
+    .then((ip) => {
+      message.channel.send(
+        `🌐 El servidor está corriendo en la IP pública: \`${ip}:25565\``
+      );
+    })
+    .catch((err) => {
+      console.error("Error al obtener IP pública:", err);
+      message.channel.send("⚠️ No se pudo obtener la IP pública.");
+    });
 
   mcProcess.stdout.on("data", (data) => {
     console.log(`[MC] ${data}`);
@@ -51,6 +61,7 @@ function startMinecraftServer(message) {
   mcProcess.on("exit", (code) => {
     console.log(`🛑 Servidor detenido con código ${code}`);
     mcProcess = null;
+    message.reply(`🛑 Servidor detenido con código ${code}`);
   });
 }
 
@@ -71,17 +82,6 @@ client.on("messageCreate", async (message) => {
     }
 
     startMinecraftServer(message);
-
-    getPublicIP()
-      .then((ip) => {
-        message.channel.send(
-          `🌐 El servidor está corriendo en la IP pública: \`${ip}:25565\``
-        );
-      })
-      .catch((err) => {
-        console.error("Error al obtener IP pública:", err);
-        message.channel.send("⚠️ No se pudo obtener la IP pública.");
-      });
   } else if (command === "stop") {
     if (!mcProcess) {
       message.reply("⚠️ El servidor no está en ejecución.");
