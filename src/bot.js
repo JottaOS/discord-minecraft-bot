@@ -33,7 +33,7 @@ function getPublicIP() {
 function startMinecraftServer(message) {
   message.reply("🟢 Iniciando servidor...");
 
-  mcProcess = spawn("java", ["-Xmx8G", "-jar", process.env.JAR_NAME, "nogui"], {
+  mcProcess = spawn("java", ["-Xmx8G", "-jar", process.env.JAR_NAME], {
     cwd: process.env.JAR_PATH,
     shell: true,
   });

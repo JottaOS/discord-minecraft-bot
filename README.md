@@ -28,11 +28,12 @@ JAR_NAME=nombre.jar
 
 ## Comandos del bot
 
-Comando | Descripción
-!mc start | Inicia el servidor de Minecraft
-!mc stop | Detiene el servidor de Minecraft
-!mc restart | Reinicia el servidor de Minecraft
-!mc getIp | Obtener la ip del server
+| Comando     | Descripción              |
+| ----------- | ------------------------ |
+| !mc start   | Inicia el servidor       |
+| !mc stop    | Detiene el servidor      |
+| !mc restart | Reinicia el servidor     |
+| !mc getIp   | Obtener la ip del server |
 
 ## Siguientes pasos
 
