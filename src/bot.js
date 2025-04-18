@@ -33,7 +33,7 @@ function startMinecraftServer(message) {
 
   mcProcess = spawn(
     "java",
-    ["-Xmx2G", "-Xms2G", "-jar", "spigot-1.21.4.jar", "nogui"],
+    ["-Xmx2G", "-Xms2G", "-jar", process.env.JAR_NAME, "nogui"],
     {
       cwd: process.env.JAR_PATH,
       shell: true,
@@ -42,7 +42,7 @@ function startMinecraftServer(message) {
   getPublicIP()
     .then((ip) => {
       message.channel.send(
-        `🌐 El servidor está corriendo en la IP pública: \`${ip}:25565\``
+        `🌐 El servidor está corriendo en la IP pública: \`${ip}\``
       );
     })
     .catch((err) => {
@@ -104,6 +104,17 @@ client.on("messageCreate", async (message) => {
     });
 
     mcProcess.stdin.write("stop\n");
+  } else if (command === "getIp") {
+    getPublicIP()
+      .then((ip) => {
+        message.channel.send(
+          `🌐 El servidor está corriendo en la IP pública: \`${ip}\``
+        );
+      })
+      .catch((err) => {
+        console.error("Error al obtener IP pública:", err);
+        message.channel.send("⚠️ No se pudo obtener la IP pública.");
+      });
   }
 });
 
