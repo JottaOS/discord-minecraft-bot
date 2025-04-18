@@ -16,14 +16,15 @@ JAR_NAME=nombre.jar
 
 ## Ejecución
 
-pm2 start src/bot.js --name "mc-bot"
-pm2 save
-pm2 logs mc-bot
+- pm2 start src/bot.js --name "mc-bot"
+- pm2 save
+- pm2 logs mc-bot
 
 (opcionales)
-pm2 stop mc-bot # Detener
-pm2 restart mc-bot # Reiniciar
-pm2 delete mc-bot # Eliminar del monitoreo
+
+- pm2 stop mc-bot # Detener
+- pm2 restart mc-bot # Reiniciar
+- pm2 delete mc-bot # Eliminar del monitoreo
 
 ## Comandos del bot
 
