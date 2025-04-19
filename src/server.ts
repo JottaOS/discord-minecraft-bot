@@ -255,12 +255,40 @@ const start = async (message: OmitPartialGroupDMChannel<Message>) => {
 };
 
 const restart = async (message: OmitPartialGroupDMChannel<Message>) => {
-	if (!utils.check_permissions(message.member!)) return await message.reply({ embeds: [utils.embed({ description: "No tenés permiso para usar este comando.", color: "Red" })] });
-	if (!mcProcess) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow" })] });
-	let response = await message.reply({ embeds: [utils.embed({ description: "Reiniciando servidor...", color: "White" })] });
-	server_open = false;
-	let success = await restartServer();
-	if (!success) return await response.edit({ embeds: [utils.embed({ description: "No se pudo reiniciar el servidor. **Revisar logs!**", color: "Red" })] });
+  if (!utils.check_permissions(message.member!))
+    return await message.reply({
+      embeds: [
+        utils.embed({
+          description: 'No tenés permiso para usar este comando.',
+          color: 'Red',
+        }),
+      ],
+    });
+  if (!mcProcess)
+    return await message.reply({
+      embeds: [
+        utils.embed({
+          description: 'El servidor no está en ejecución.',
+          color: 'Yellow',
+        }),
+      ],
+    });
+  let response = await message.reply({
+    embeds: [
+      utils.embed({ description: 'Reiniciando servidor...', color: 'White' }),
+    ],
+  });
+  server_open = false;
+  let success = await restartServer();
+  if (!success)
+    return await response.edit({
+      embeds: [
+        utils.embed({
+          description: 'No se pudo reiniciar el servidor. **Revisar logs!**',
+          color: 'Red',
+        }),
+      ],
+    });
 
   let ip = await getIp();
   const ipExists = ip ? true : false;
