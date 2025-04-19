@@ -38,7 +38,7 @@ const getIp = async (): Promise<string | null> => {
 	return null;
 }
 
-const startServer = () => {
+const serverProcess = () => {
 	let jar_name = process.env.JAR_NAME;
 	let jar_path = process.env.JAR_PATH;
 	let mem = process.env.MEMORY;
@@ -46,13 +46,6 @@ const startServer = () => {
 	if (!jar_path) throw new Error("process.env.JAR_PATH == undefined");
 	if (!jar_name) throw new Error("process.env.JAR_NAME == undefined");
 	if (!mem) throw new Error("process.env.MEMORY == undefined");
-
-	utils.log({
-		prefix: "[BOT]",
-		message: "Iniciando el servidor...",
-		color: "Green",
-		important: true
-	});
 
 	mcProcess = spawn("java", [`-Xmx${mem}G`, "-jar", jar_name], {
 		cwd: jar_path,
@@ -67,7 +60,7 @@ const startServer = () => {
 			color: "Red",
 			important: true
 		});
-		
+
 		console.error(err);
 		utils.killProcess(mcProcess)
 		server_open = false;
@@ -83,7 +76,7 @@ const startServer = () => {
 			color: "Red",
 			important: true
 		});
-		
+
 		server_open = false;
 		mcProcess = null;
 		cache_ip = null;
@@ -117,17 +110,48 @@ const startServer = () => {
 	})
 }
 
+const startServer = async () => {
+	if (!mcProcess) {
+		server_open = false;
+		utils.log({
+			prefix: "[BOT]",
+			message: "Iniciando el servidor...",
+			color: "Green",
+			important: true
+		});
+		serverProcess();
+
+		let opened = await waitForTrue(() => server_open);
+		if (!opened) {
+			utils.log({
+				prefix: "[BOT]",
+				message: "No se pudo iniciar el servidor. **Revisar logs!**",
+				color: "Red",
+				important: true
+			});
+		}
+		return opened;
+	} else {
+		utils.log({
+			prefix: "[BOT]",
+			message: "El servidor se intentó iniciar pero ya estaba en ejecución.",
+			color: "Yellow",
+			important: true
+		});
+		return true;
+	}
+}
+
 const restartServer = async () => {
 	if (mcProcess && !mcProcess.killed) {
-		stopServer();
-
+		await stopServer();
 		utils.log({
 			prefix: "[BOT]",
 			message: "Reiniciando el servidor...",
 			color: "Green",
 			important: true
 		});
-		startServer();
+		return await startServer();
 	} else {
 		utils.log({
 			prefix: "[BOT]",
@@ -135,11 +159,14 @@ const restartServer = async () => {
 			color: "Yellow",
 			important: true
 		});
+		return false;
 	}
 }
 
 const stopServer = async () => {
 	if (mcProcess && !mcProcess.killed) {
+		server_open = false;
+
 		utils.log({
 			prefix: "[BOT]",
 			message: "Deteniendo el servidor...",
@@ -155,8 +182,7 @@ const stopServer = async () => {
 				color: "Red",
 				important: true
 			});
-
-			server_open = false;
+			
 			mcProcess = null;
 			cache_ip = null;
 		});
@@ -170,9 +196,9 @@ const stopServer = async () => {
 	}
 }
 
-const waitForTrue = async (checkFn: () => boolean, timeout = 25000, interval = 100): Promise<boolean> => {
+const waitForTrue = async (checkFn: () => boolean, timeout = 25000, interval = 500): Promise<boolean> => {
 	const start = Date.now();
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		const check = () => {
 			if (checkFn()) return resolve(true);
 			if (Date.now() - start > timeout) return resolve(false);
@@ -186,13 +212,9 @@ const start = async (message: OmitPartialGroupDMChannel<Message>) => {
 	if (mcProcess) return await message.reply({ embeds: [utils.embed({ description: "El servidor ya está en ejecución.", color: "Yellow" })] });
 
 	let response = await message.reply({ embeds: [utils.embed({ description: "Iniciando servidor...", color: "White" })] });
-	startServer();
 
-	let opened = await waitForTrue(() => server_open);
-
-	if (!opened) {
-		return await response.edit({ embeds: [utils.embed({ description: "No se pudo iniciar el servidor. **Revisar logs!**", color: "Red" })] });
-	}
+	let success = await startServer();
+	if (!success) return await response.edit({ embeds: [utils.embed({ description: "No se pudo iniciar el servidor. **Revisar logs!**", color: "Red" })] });
 
 	let ip = await getIp();
 	const ipExists = ip ? true : false;
@@ -211,10 +233,8 @@ const restart = async (message: OmitPartialGroupDMChannel<Message>) => {
 	if (!mcProcess) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow" })] });
 
 	let response = await message.reply({ embeds: [utils.embed({ description: "Reiniciando servidor...", color: "White" })] });
-	restartServer();
-
-	let opened = await (waitForTrue(() => server_open));
-	if (!opened) return await response.edit({ embeds: [utils.embed({ description: "No se pudo reiniciar el servidor. **Revisar logs!**", color: "Red" })] });
+	let success = await restartServer();
+	if (!success) return await response.edit({ embeds: [utils.embed({ description: "No se pudo reiniciar el servidor. **Revisar logs!**", color: "Red" })] });
 
 	let ip = await getIp();
 	const ipExists = ip ? true : false;
