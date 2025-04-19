@@ -5,7 +5,7 @@
   "scripts": {
     "start": "tsc && node dist/bot.js",
     "build": "tsc",
-    "dev": "nodemon src/bot.js"
+    "dev": "nodemon src/bot.ts"
   },
   "keywords": [],
   "author": "JOTITA MENDOZA, MARCEMEISTER Y CHATGPT Y FLOEMIA",

@@ -1,7 +1,7 @@
-import { OmitPartialGroupDMChannel, Message, TextChannel, Role, GuildMember, EmbedBuilder, ColorResolvable } from "discord.js";
+import { OmitPartialGroupDMChannel, Message } from "discord.js";
 import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { utils } from "./utils";
-import { Color, EmbedCreatorParameters } from "../typings/types";
+import { EmbedCreatorParameters } from "../typings/types";
 
 let mcProcess: ChildProcessWithoutNullStreams | null = null;
 let cache_ip: string | null = null;
@@ -68,7 +68,7 @@ const startServer = () => {
 		});
 
 		console.error(err);
-		mcProcess!.kill();
+		utils.killProcess(mcProcess)
 		mcProcess = null;
 		cache_ip = null;
 		return;
@@ -139,7 +139,7 @@ const stopServer = async () => {
 			important: true
 		});
 
-		process.stdin.write("stop\n"); 
+		utils.killProcess(mcProcess)
 		
 		mcProcess.once('exit', () => {
 			utils.log({
@@ -148,7 +148,6 @@ const stopServer = async () => {
 				color: "Red",
 				important: true
 			});
-			mcProcess?.kill()
 			mcProcess = null;
 			cache_ip = null;
 		});

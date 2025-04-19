@@ -1,6 +1,8 @@
-import { GuildMember, ColorResolvable, EmbedBuilder } from "discord.js";
+import { GuildMember, EmbedBuilder } from "discord.js";
 import { Color, EmbedCreatorParameters, LogCreatorParameters } from "../typings/types";
 import * as chalk from "chalk";
+import { ChildProcessWithoutNullStreams } from "child_process";
+
 const check_permissions = async (member: GuildMember) => {
 	return member.roles.cache.some((role) => role.name === "mc-admin");
 }
@@ -74,5 +76,10 @@ const getHexColor = (color: Color) => {
 			return "#FFFFFF";
 	}
 }
+const killProcess = (process: ChildProcessWithoutNullStreams | null) => {
+	if (!process) return false;
+	process.stdin.write("stop\n");
+	return true;
+};
 
-export const utils = { check_permissions, embed, log, formatDate, getCircleEmoji, getHexColor };
+export const utils = { check_permissions, embed, log, formatDate, getCircleEmoji, getHexColor, killProcess };

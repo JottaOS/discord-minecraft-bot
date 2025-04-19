@@ -4,6 +4,7 @@ $ git clone -b floemia-rewrite https://github.com/JottaOS/discord-minecraft-bot.
 $ npm install
 $ npm install -g pm2
 $ npm install -g typescript
+$ npm install -g ts-node
 ```
 ## Configuración
 
