@@ -61,37 +61,36 @@ const startServer = () => {
 	});
 
 	mcProcess.on("error", (err) => {
-		server_open = false;
 		utils.log({
 			prefix: "[BOT][ERROR]",
 			message: `El proceso ha tenido un error.`,
 			color: "Red",
 			important: true
 		});
-
+		
 		console.error(err);
 		utils.killProcess(mcProcess)
+		server_open = false;
 		mcProcess = null;
 		cache_ip = null;
 		return;
 	});
 
 	mcProcess.on("exit", async (code, signal) => {
-
-		server_open = false;
 		utils.log({
 			prefix: "[BOT]",
 			message: `Servidor detenido con código ${code} y señal ${signal}`,
 			color: "Red",
 			important: true
 		});
-
+		
+		server_open = false;
 		mcProcess = null;
 		cache_ip = null;
 	});
 
 	mcProcess.stdout.on("data", (data) => {
-		if (!open && data.includes("[Server thread/INFO]: Done")) server_open = true;
+		if (!server_open && data.includes("[Server thread/INFO]: Done")) server_open = true;
 		utils.log({
 			prefix: "[MC]",
 			message: data,
@@ -128,14 +127,19 @@ const restartServer = async () => {
 			color: "Green",
 			important: true
 		});
-
 		startServer();
+	} else {
+		utils.log({
+			prefix: "[BOT]",
+			message: "El servidor se intentó reiniciar pero no estaba en ejecución.",
+			color: "Yellow",
+			important: true
+		});
 	}
 }
 
 const stopServer = async () => {
 	if (mcProcess && !mcProcess.killed) {
-
 		utils.log({
 			prefix: "[BOT]",
 			message: "Deteniendo el servidor...",
@@ -144,7 +148,6 @@ const stopServer = async () => {
 		});
 
 		utils.killProcess(mcProcess)
-		server_open = false;
 		mcProcess.once('exit', () => {
 			utils.log({
 				prefix: "[BOT]",
@@ -152,18 +155,27 @@ const stopServer = async () => {
 				color: "Red",
 				important: true
 			});
+
+			server_open = false;
 			mcProcess = null;
 			cache_ip = null;
+		});
+	} else {
+		utils.log({
+			prefix: "[BOT]",
+			message: "El servidor se intentó detener pero no estaba en ejecución.",
+			color: "Yellow",
+			important: true
 		});
 	}
 }
 
-const waitForTrue = async (checkFn: () => boolean, timeout = 10000, interval = 100): Promise<void> => {
+const waitForTrue = async (checkFn: () => boolean, timeout = 25000, interval = 100): Promise<boolean> => {
 	const start = Date.now();
 	return new Promise((resolve, reject) => {
 		const check = () => {
-			if (checkFn()) return resolve();
-			if (Date.now() - start > timeout) return reject(new Error('Server timed out'));
+			if (checkFn()) return resolve(true);
+			if (Date.now() - start > timeout) return resolve(false);
 			setTimeout(check, interval);
 		};
 		check();
@@ -176,8 +188,9 @@ const start = async (message: OmitPartialGroupDMChannel<Message>) => {
 	let response = await message.reply({ embeds: [utils.embed({ description: "Iniciando servidor...", color: "White" })] });
 	startServer();
 
-	await waitForTrue(() => server_open);
-	if (!mcProcess) {
+	let opened = await waitForTrue(() => server_open);
+
+	if (!opened) {
 		return await response.edit({ embeds: [utils.embed({ description: "No se pudo iniciar el servidor. **Revisar logs!**", color: "Red" })] });
 	}
 
@@ -200,8 +213,8 @@ const restart = async (message: OmitPartialGroupDMChannel<Message>) => {
 	let response = await message.reply({ embeds: [utils.embed({ description: "Reiniciando servidor...", color: "White" })] });
 	restartServer();
 
-	await (waitForTrue(() => server_open));
-	if (!mcProcess) return await response.edit({ embeds: [utils.embed({ description: "No se pudo reiniciar el servidor. **Revisar logs!**", color: "Red" })] });
+	let opened = await (waitForTrue(() => server_open));
+	if (!opened) return await response.edit({ embeds: [utils.embed({ description: "No se pudo reiniciar el servidor. **Revisar logs!**", color: "Red" })] });
 
 	let ip = await getIp();
 	const ipExists = ip ? true : false;
