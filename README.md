@@ -1,9 +1,10 @@
 ## Instalación
-
-- git clone https://github.com/JottaOS/discord-minecraft-bot.git
-- npm install
-- npm install -g pm2 (si no lo tienes)
-
+```
+$ git clone -b floemia-rewrite https://github.com/JottaOS/discord-minecraft-bot.git
+$ npm install
+$ npm install -g pm2
+$ npm install -g typescript
+```
 ## Configuración
 
 Crear archivo `.env` con las siguientes variables
@@ -17,15 +18,20 @@ MEMORY=Integer
 
 ## Ejecución
 
-- pm2 start src/bot.js --name "mc-bot"
-- pm2 save
-- pm2 logs mc-bot
+```
+$ npm run build
+$ pm2 start ./dist/bot.js --name "mc-bot"
+$ pm2 save
+```
 
 (opcionales)
 
-- pm2 stop mc-bot # Detener
-- pm2 restart mc-bot # Reiniciar
-- pm2 delete mc-bot # Eliminar del monitoreo
+```
+$ pm2 logs mc-bot 		# Ver logs
+$ pm2 stop mc-bot 		# Detener bot
+$ pm2 restart mc-bot 	# Reiniciar bot
+$ pm2 delete mc-bot 	# Detener y eliminar bot de pm2
+```
 
 ## Comandos del bot
 

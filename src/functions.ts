@@ -9,14 +9,14 @@ const getIp = async (): Promise<string | null> => {
 	try {
 		const response = await fetch('https://api.ipify.org?format=json');
 		if (!response.ok) {
-			console.error("Error al obtener la IP pública:", response.statusText);
+			console.error("[BOT][ERROR] - Error al obtener la IP:", response.statusText);
 			return null;
 		}
 		const data = await response.json();
 		cache_ip = data.ip;
 		return cache_ip;
 	} catch (err) {
-		console.error("Error al obtener la IP pública:", err);
+		console.error("[BOT][ERROR] - Error al obtener la IP:", err);
 	}
 	return null;
 }
@@ -30,21 +30,23 @@ const startServer = () => {
 	if (!jar_name) throw new Error("process.env.JAR_NAME == undefined");
 	if (!mem) throw new Error("process.env.MEMORY == undefined");
 
+	console.log(`[BOT] - Iniciando el servidor...`);
 	mcProcess = spawn("java", [`-Xmx${mem}G`, "-jar", jar_name], {
 		cwd: jar_path,
 		shell: true,
 	});
+	console.log("[BOT] - Servidor iniciado con éxito.");
 
 	mcProcess.stdout.on("data", (data) => {
 		console.log(`[MC] ${data}`);
 	});
 
 	mcProcess.stderr.on("data", (data) => {
-		console.error(`[MC Error] ${data}`);
+		console.error(`[MC][ERROR] ${data}`);
 	});
 
 	mcProcess.on("exit", async (code, signal) => {
-		console.log(`🛑 Servidor detenido con código ${code} y señal ${signal}`);
+		console.log(`[BOT] - 🛑 Servidor detenido con código ${code} y señal ${signal}`);
 		mcProcess = null;
 	});
 }
@@ -52,18 +54,18 @@ const startServer = () => {
 const restartServer = async () => {
 	if (mcProcess && !mcProcess.killed) {
 		stopServer();
-		console.log('Reiniciando el servidor...');
+		console.log('[BOT] - Reiniciando el servidor...');
 		startServer();
 	}
-
 }
 
 const stopServer = async () => {
 	if (mcProcess && !mcProcess.killed) {
-		console.log('Deteniendo el servidor...');
+		console.log('[BOT] - Deteniendo el servidor...');
 		mcProcess.kill();
 		mcProcess.once('exit', () => {
-			console.log('Servidor detenido.');
+			console.log('[BOT] - Servidor detenido.');
+			mcProcess = null;
 		});
 	}
 }
@@ -87,6 +89,9 @@ const start = async (message: OmitPartialGroupDMChannel<Message>) => {
 };
 
 const restart = async (message: OmitPartialGroupDMChannel<Message>) => {
+	if (!check_permissions(message.member!)) {
+		return await message.reply("⛔ No tenés permiso para usar este comando.");
+	}
 	if (!mcProcess) return await message.reply("⚠️ El servidor no está en ejecución.");
 
 	let response = await message.reply("♻️ Reiniciando servidor...");

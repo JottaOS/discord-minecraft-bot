@@ -1,4 +1,7 @@
 require("dotenv").config();
+let token = process.env.DISCORD_TOKEN;
+if (!token) throw new Error("process.env.DISCORD_TOKEN == undefined");
+
 import { Client, GatewayIntentBits } from "discord.js";
 import { server } from "./functions";
 
@@ -36,4 +39,4 @@ client.on("messageCreate", async (message) => {
 	};
 });
 
-client.login(process.env.DISCORD_TOKEN);
+client.login(token);
