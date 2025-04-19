@@ -27,20 +27,21 @@ $ pm2 save
 (opcionales)
 
 ```
-$ pm2 logs mc-bot 		# Ver logs
-$ pm2 stop mc-bot 		# Detener bot
+$ pm2 logs mc-bot 	# Ver logs
+$ pm2 start mc-bot 	# Iniciar bot (si no lo estás ejecutando)
 $ pm2 restart mc-bot 	# Reiniciar bot
+$ pm2 stop mc-bot 	# Detener bot
 $ pm2 delete mc-bot 	# Detener y eliminar bot de pm2
 ```
 
 ## Comandos del bot
 
-| Comando     | Descripción              |
-| ----------- | ------------------------ |
-| !mc start   | Inicia el servidor       |
-| !mc stop    | Detiene el servidor      |
-| !mc restart | Reinicia el servidor     |
-| !mc ip      | Obtener la ip del server |
+| Comando     | Descripción                |
+| ----------- | -------------------------- |
+| !mc start   | Inicia el servidor         |
+| !mc stop    | Detiene el servidor        |
+| !mc restart | Reinicia el servidor       |
+| !mc ip      | Obtener la IP del servidor |
 
 ## Siguientes pasos
 
