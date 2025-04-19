@@ -3,9 +3,10 @@ import { ChildProcessWithoutNullStreams, spawn } from "child_process";
 import { utils } from "./utils";
 import { EmbedCreatorParameters } from "../typings/types";
 
+
 let mcProcess: ChildProcessWithoutNullStreams | null = null;
 let cache_ip: string | null = null;
-
+let server_open = false;
 
 const getIp = async (): Promise<string | null> => {
 	if (cache_ip) return cache_ip;
@@ -55,11 +56,12 @@ const startServer = () => {
 
 	mcProcess = spawn("java", [`-Xmx${mem}G`, "-jar", jar_name], {
 		cwd: jar_path,
+		windowsHide: true,
 		shell: true,
 	});
 
 	mcProcess.on("error", (err) => {
-
+		server_open = false;
 		utils.log({
 			prefix: "[BOT][ERROR]",
 			message: `El proceso ha tenido un error.`,
@@ -76,6 +78,7 @@ const startServer = () => {
 
 	mcProcess.on("exit", async (code, signal) => {
 
+		server_open = false;
 		utils.log({
 			prefix: "[BOT]",
 			message: `Servidor detenido con código ${code} y señal ${signal}`,
@@ -88,6 +91,7 @@ const startServer = () => {
 	});
 
 	mcProcess.stdout.on("data", (data) => {
+		if (!open && data.includes("[Server thread/INFO]: Done")) server_open = true;
 		utils.log({
 			prefix: "[MC]",
 			message: data,
@@ -140,7 +144,7 @@ const stopServer = async () => {
 		});
 
 		utils.killProcess(mcProcess)
-		
+		server_open = false;
 		mcProcess.once('exit', () => {
 			utils.log({
 				prefix: "[BOT]",
@@ -154,14 +158,27 @@ const stopServer = async () => {
 	}
 }
 
-const start = async (message: OmitPartialGroupDMChannel<Message>) => {
-	if (mcProcess && mcProcess.pid) return await message.reply({ embeds: [utils.embed({ description: "El servidor ya está en ejecución.", color: "Yellow"})] });
+const waitForTrue = async (checkFn: () => boolean, timeout = 10000, interval = 100): Promise<void> => {
+	const start = Date.now();
+	return new Promise((resolve, reject) => {
+		const check = () => {
+			if (checkFn()) return resolve();
+			if (Date.now() - start > timeout) return reject(new Error('Server timed out'));
+			setTimeout(check, interval);
+		};
+		check();
+	});
+}
 
-	let response = await message.reply({ embeds: [utils.embed({ description: "Iniciando servidor...", color: "White"})] });	
+const start = async (message: OmitPartialGroupDMChannel<Message>) => {
+	if (mcProcess) return await message.reply({ embeds: [utils.embed({ description: "El servidor ya está en ejecución.", color: "Yellow" })] });
+
+	let response = await message.reply({ embeds: [utils.embed({ description: "Iniciando servidor...", color: "White" })] });
 	startServer();
 
-	if (!mcProcess?.pid) {
-		return await response.edit({ embeds: [utils.embed({ description: "No se pudo iniciar el servidor. **Revisar logs!**", color: "Red"})] });
+	await waitForTrue(() => server_open);
+	if (!mcProcess) {
+		return await response.edit({ embeds: [utils.embed({ description: "No se pudo iniciar el servidor. **Revisar logs!**", color: "Red" })] });
 	}
 
 	let ip = await getIp();
@@ -177,13 +194,14 @@ const start = async (message: OmitPartialGroupDMChannel<Message>) => {
 };
 
 const restart = async (message: OmitPartialGroupDMChannel<Message>) => {
-	if (!utils.check_permissions(message.member!)) return await message.reply({ embeds: [utils.embed({ description: "No tenés permiso para usar este comando.", color: "Red"})] });
-	if (!mcProcess || !mcProcess.pid) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow"})] });
+	if (!utils.check_permissions(message.member!)) return await message.reply({ embeds: [utils.embed({ description: "No tenés permiso para usar este comando.", color: "Red" })] });
+	if (!mcProcess) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow" })] });
 
-	let response = await message.reply({ embeds: [utils.embed({ description: "Reiniciando servidor...", color: "White"})] });
+	let response = await message.reply({ embeds: [utils.embed({ description: "Reiniciando servidor...", color: "White" })] });
 	restartServer();
 
-	if (!mcProcess.pid) return await response.edit({ embeds: [utils.embed({ description: "No se pudo reiniciar el servidor. **Revisar logs!**", color: "Red"})] });
+	await (waitForTrue(() => server_open));
+	if (!mcProcess) return await response.edit({ embeds: [utils.embed({ description: "No se pudo reiniciar el servidor. **Revisar logs!**", color: "Red" })] });
 
 	let ip = await getIp();
 	const ipExists = ip ? true : false;
@@ -196,18 +214,18 @@ const restart = async (message: OmitPartialGroupDMChannel<Message>) => {
 };
 
 const stop = async (message: OmitPartialGroupDMChannel<Message>) => {
-	if (!utils.check_permissions(message.member!)) return await message.reply({ embeds: [utils.embed({ description: "No tenés permiso para usar este comando.", color: "Red"})] });
-	if (!mcProcess || !mcProcess.pid) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow"})] });
+	if (!utils.check_permissions(message.member!)) return await message.reply({ embeds: [utils.embed({ description: "No tenés permiso para usar este comando.", color: "Red" })] });
+	if (!mcProcess) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow" })] });
 
-	let response = await message.reply({ embeds: [utils.embed({ description: "Deteniendo servidor...", color: "White"})] });
+	let response = await message.reply({ embeds: [utils.embed({ description: "Deteniendo servidor...", color: "White" })] });
 	stopServer();
 
-	response.edit({ embeds: [utils.embed({ description: "Servidor detenido.", color: "Red"})] });
+	response.edit({ embeds: [utils.embed({ description: "Servidor detenido.", color: "Red" })] });
 };
 
 const ip = async (message: OmitPartialGroupDMChannel<Message>) => {
-	if (!mcProcess || !mcProcess.pid) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow"})] });
-	let response = await message.reply({ embeds: [utils.embed({ description: "Obteniendo IP del servidor...", color: "White"})] });
+	if (!mcProcess) return await message.reply({ embeds: [utils.embed({ description: "El servidor no está en ejecución.", color: "Yellow" })] });
+	let response = await message.reply({ embeds: [utils.embed({ description: "Obteniendo IP del servidor...", color: "White" })] });
 	let ip = await getIp();
 	const ipExists = ip ? true : false;
 
