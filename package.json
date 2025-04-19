@@ -1,21 +1,33 @@
 {
   "name": "test-bot-mc",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "main": "index.js",
   "scripts": {
-    "start": "node src/bot.js",
-    "dev": "nodemon src/bot.js"
+    "start": "tsc && node dist/bot.js",
+    "build": "tsc",
+    "dev": "nodemon src/bot.ts"
   },
   "keywords": [],
-  "author": "JOTITA MENDOZA, MARCEMEISTER Y CHATGPT",
+  "author": "JOTITA MENDOZA, MARCEMEISTER Y CHATGPT Y FLOEMIA",
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "chalk": "^4.1.2",
     "child_process": "^1.0.2",
     "discord.js": "^14.18.0",
-    "dotenv": "^16.5.0"
+    "dotenv": "^16.5.0",
+    "pm2": "^6.0.5",
+    "typescript": "^5.8.3"
   },
   "devDependencies": {
-    "nodemon": "^3.1.9"
+    "@eslint/js": "^9.19.0",
+    "@trivago/prettier-plugin-sort-imports": "^5.2.2",
+    "@typescript-eslint/eslint-plugin": "^8.23.0",
+    "@typescript-eslint/parser": "^8.23.0",
+    "eslint": "^9.25.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.3",
+    "nodemon": "^3.1.9",
+    "prettier": "^3.5.3"
   }
 }
