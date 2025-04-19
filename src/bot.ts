@@ -3,13 +3,17 @@ let token = process.env.DISCORD_TOKEN;
 if (!token) throw new Error("process.env.DISCORD_TOKEN == undefined");
 
 import { Client, GatewayIntentBits } from "discord.js";
-import { server } from "./functions";
-import { log } from "./functions";
+import { server } from "./server";
+import { utils } from "./utils";
 
-const red = '\x1b[31m';
-const green = '\x1b[32m';
-const yellow = '\x1b[33m';
-const reset = '\x1b[0m';
+utils.log({
+	prefix: "[BOT]",
+	message: "Variables de entorno cargadas. Iniciando...",
+	important: true,
+	color: "Green",
+});
+
+
 
 const client = new Client({
 	intents: [
@@ -21,7 +25,11 @@ const client = new Client({
 });
 
 client.once("ready", () => {
-	log("[BOT]", `${client.user?.username} está online!`, "green", "normal");
+	utils.log({
+		prefix: "[BOT]",
+		message: `${client.user?.username} está online!`,
+		color: "Green",
+	});
 });
 
 client.on("messageCreate", async (message) => {
@@ -43,6 +51,16 @@ client.on("messageCreate", async (message) => {
 			await server.ip(message);
 			break;
 	};
+});
+
+
+client.on("error", (err) => {
+	utils.log({
+		prefix: "[BOT][ERROR]",
+		message: `Error en el cliente: ${err}`,
+		color: "Red",
+		important: true
+	});
 });
 
 client.login(token);
