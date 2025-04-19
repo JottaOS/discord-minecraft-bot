@@ -12,6 +12,7 @@ Crear archivo `.env` con las siguientes variables
 DISCORD_TOKEN=el_token_del_papu
 JAR_PATH=C:\path\spigot
 JAR_NAME=nombre.jar
+MEMORY=Integer
 ```
 
 ## Ejecución
@@ -33,7 +34,7 @@ JAR_NAME=nombre.jar
 | !mc start   | Inicia el servidor       |
 | !mc stop    | Detiene el servidor      |
 | !mc restart | Reinicia el servidor     |
-| !mc getIp   | Obtener la ip del server |
+| !mc ip      | Obtener la ip del server |
 
 ## Siguientes pasos
 
