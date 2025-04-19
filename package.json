@@ -1,6 +1,6 @@
 {
   "name": "test-bot-mc",
-  "version": "1.0.0",
+  "version": "1.0.3",
   "main": "index.js",
   "scripts": {
     "start": "tsc && node dist/bot.js",

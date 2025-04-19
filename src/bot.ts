@@ -4,6 +4,12 @@ if (!token) throw new Error("process.env.DISCORD_TOKEN == undefined");
 
 import { Client, GatewayIntentBits } from "discord.js";
 import { server } from "./functions";
+import { log } from "./functions";
+
+const red = '\x1b[31m';
+const green = '\x1b[32m';
+const yellow = '\x1b[33m';
+const reset = '\x1b[0m';
 
 const client = new Client({
 	intents: [
@@ -15,7 +21,7 @@ const client = new Client({
 });
 
 client.once("ready", () => {
-	console.log(`✅ Bot conectado como ${client.user?.tag}`);
+	log("[BOT]", `${client.user?.username} está online!`, "green", "normal");
 });
 
 client.on("messageCreate", async (message) => {
@@ -23,7 +29,7 @@ client.on("messageCreate", async (message) => {
 	const args = message.content.split(" ");
 	const command = args[1];
 	if (!command) return;
-	switch (command) {
+	switch (command.toLowerCase()) {
 		case "start":
 			await server.start(message);
 			break;
