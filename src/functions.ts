@@ -48,6 +48,7 @@ const startServer = () => {
 	mcProcess.on("exit", async (code, signal) => {
 		console.log(`[BOT] - 🛑 Servidor detenido con código ${code} y señal ${signal}`);
 		mcProcess = null;
+		cache_ip = null;
 	});
 }
 
@@ -66,6 +67,7 @@ const stopServer = async () => {
 		mcProcess.once('exit', () => {
 			console.log('[BOT] - Servidor detenido.');
 			mcProcess = null;
+			cache_ip = null;
 		});
 	}
 }
