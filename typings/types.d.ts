@@ -1,16 +1,23 @@
-import { ColorResolvable } from "discord.js";
+import { ColorResolvable } from 'discord.js';
 
 interface EmbedCreatorParameters {
-	description: string;
-	color: Color;
+  description: string;
+  color: Color;
 }
 
 interface LogCreatorParameters {
-	prefix: string;
-	message: string;
-	color: Color;
-	important?: boolean;
+  prefix: string;
+  message: string;
+  color: Color;
+  important?: boolean;
 }
 
-type Color = "Red" | "Orange" | "Yellow" | "Green" | "Blue" | "Purple" | "White";
+type Color =
+  | 'Red'
+  | 'Orange'
+  | 'Yellow'
+  | 'Green'
+  | 'Blue'
+  | 'Purple'
+  | 'White';
 export type { EmbedCreatorParameters, LogCreatorParameters, Color };

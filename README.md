@@ -1,4 +1,5 @@
 ## Instalación
+
 ```
 $ git clone -b floemia-rewrite https://github.com/JottaOS/discord-minecraft-bot.git
 $ npm install
@@ -6,6 +7,7 @@ $ npm install -g pm2
 $ npm install -g typescript
 $ npm install -g ts-node
 ```
+
 ## Configuración
 
 Crear archivo `.env` con las siguientes variables
