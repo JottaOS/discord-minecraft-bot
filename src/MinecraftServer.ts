@@ -130,6 +130,7 @@ export class MinecraftServer {
 		})
 		if (this.mcProcess) await this.stop()
 		await this.saveLogs();
+		process.exit();
 	}
 	public handleCrash = async (err: Error) => {
 		utils.log({
@@ -140,6 +141,7 @@ export class MinecraftServer {
 		});
 		console.error(err);
 		await this.saveLogs();
+		process.exit();
 	}
 	public status = (): ProcessStatus => {
 		return {
