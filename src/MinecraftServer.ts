@@ -125,7 +125,7 @@ export class MinecraftServer {
 	public handleExit = async () => {
 		utils.log({
 			prefix: '[BOT]',
-			message: 'Bot detenido con SIGINT o SIGTERM.',
+			message: 'Bot detenido.',
 			color: 'Red',
 		})
 		if (this.mcProcess) await this.stop()

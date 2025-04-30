@@ -46,7 +46,7 @@ $ pm2 delete mc-bot 	# Detener y eliminar bot de pm2
 | !mc restart | Reinicia el servidor                         |
 | !mc ip      | Obtener la IP del servidor 					 |
 | !mc status  | Obtener el estado del servidor y del proceso |
-
+| !mc logs    | Obtener los logs y enviarlos al DM           |
 | !mc kill    | Detiene el proceso forzosamente  			 |	 
 
 ## Siguientes pasos
